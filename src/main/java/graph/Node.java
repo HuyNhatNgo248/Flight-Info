@@ -1,3 +1,9 @@
+/*
+ * Author: Huy Nhat Ngo
+ * Date: 6/3/2020
+ * Purpose: add more data fields, including visited, hop, bpE and their getters and setters
+ * to support computeEnhancements in ShortestPaths.java (enhancements)
+ */
 package graph;
 
 import java.util.HashMap;
@@ -17,12 +23,43 @@ public class Node {
     //  v -> the weight of the edge
     private HashMap<Node, Double> neighbors;
     private boolean visited = false;
+    private int hop; //hop value
+    private Node bpE; //back pointer for Enhancements
+
     /**
      * Constructor: create node with the given id
      */
     public Node(String id) {
         this.id = id;
         neighbors = new HashMap<Node, Double>();
+    }
+
+    /**
+     * Return the edge's count to the node
+     */
+    public int getHop() {
+        return hop;
+    }
+
+    /**
+     * Update the edge's count to the node
+     */
+    public void setHop(int hop) {
+        this.hop = hop;
+    }
+
+    /**
+     * Return the back pointer
+     */
+    public Node getBpE() {
+        return bpE;
+    }
+
+    /**
+     * Update the back pointer
+     */
+    public void setBpE(Node bpE) {
+        this.bpE = bpE;
     }
 
     /**

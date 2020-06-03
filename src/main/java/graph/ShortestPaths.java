@@ -1,11 +1,30 @@
+/*
+ * Author: Huy Nhat Ngo
+ * Date: 6/3/2020
+ * Purpose: this class implements Dijkstra’s Single-Source Shortest Paths algorithm
+ * and modified Breath-First Search to find the smallest hop from origin to destination
+ */
 package graph;
 
-
 import heap.Heap;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+
+/*
+ * 1/ Main method behavior: upon running the main method, call executeCommand to
+ * prompt the user to select one of the two options: (1) find shortest path (base assignment)
+ * (2) find fewest hops (enhancements) to execute either djikstra for (1) or BFS for (2)
+ * If user selects (2), precondition requires total number of command line arguments are 4 (including dest)
+ * Then display the number of nodes and edges (hops) from origin to destination
+ *
+ * 2/ I decided to use BFS but modified the algorithm in a way that keeps track of
+ * the shortest amount of edges (hops) and back pointer node so the algorithm can track
+ * back to its origin. I create another hashmap named updateHop that takes in a stringID-Node pair.
+ * updateHop is similar to paths hashmap in Djikstra except it doesn't create PathData object. I provide
+ * 3 more fields in Node: visited hop, bpE to keep track of whether a node is visited and to
+ * update the hop and back pointer fields when queue has duplicate Nodes that potentially requires less hop to reach.
+ */
 
 /**
  * Provides an implementation of Dijkstra's single-source shortest paths
@@ -23,7 +42,10 @@ public class ShortestPaths {
     // stores auxiliary data associated with each node for the shortest
     // paths computation:
     private HashMap<Node, PathData> paths;
-
+    //enhancements
+    //store string-node pair value
+    //use to update hop value for computeEnhancements method
+    HashMap<String, Node> updateHop = new HashMap<>();
     /**
      * Compute the shortest path to all nodes from origin using Dijkstra's
      * algorithm. Fill in the paths field, which associates each Node with its
@@ -53,6 +75,36 @@ public class ShortestPaths {
                     frontier.changePriority(w, paths.get(w).distance);
                 }
             }
+        }
+    }
+
+    /**
+     * Returns a LinkedList of the nodes along the smallest hop from origin
+     * to destination. This path includes the origin and destination. If origin
+     * and destination are the same node, it is included only once.
+     * If no path to it exists, return null.
+     * Precondition: destination is a node in the graph, and compute(origin)
+     * has been called.
+     */
+    public LinkedList<Node> shortestHop(Node destination) {
+        if (!updateHop.containsValue(destination)) {
+            return null;
+        } else {
+            LinkedList<Node> lst = new LinkedList<>();
+            lst.add(destination);
+            Node counter = updateHop.get(destination.getId()).getBpE();
+            while (counter != null) {
+                lst.add(counter);
+                counter = updateHop.get(counter.getId()).getBpE();
+            }
+
+            if (lst.size() == 1)
+                return lst;
+            else if (lst.get(0).equals(lst.getLast()))
+                lst.removeLast();
+
+            Collections.reverse(lst);
+            return lst;
         }
     }
 
@@ -93,6 +145,7 @@ public class ShortestPaths {
                 lst.add(counter);
                 counter = paths.get(counter).previous;
             }
+
             if (lst.size() == 1)
                 return lst;
             else if (lst.get(0).equals(lst.getLast()))
@@ -103,22 +156,44 @@ public class ShortestPaths {
         }
     }
 
-
+    /**
+     * Compute the shortest hop value (shortest number of edges from origin to dest node)
+     * Instantiate updateHop to keep track of hop value and back pointer.
+     * When the added Node to the queue also happens to be the visited node,
+     * call updateHop to update hop value and back pointer
+     * otherwise, it's a unique node, add to the updateHop hashmap
+     * Once executed, updateNode holds all unique Node and its smallest hop value from origin
+     * Pre: origin is a node in the graph
+     */
     public void computeEnhancements(Node origin) {
-        paths = new HashMap<>();
-        Queue<Node> queue = new LinkedList<>();
-
-        //default distance field in PathData to 0
-        //only keep track of its predecessor node
-        paths.put(origin, new PathData(0, null));
+        Queue<Node> queue = new ArrayDeque<>();
+        updateHop = new HashMap<>();
         queue.add(origin);
+        origin.setBpE(null);
+        origin.setHop(0);
+
+        updateHop.put(origin.getId(), new Node(origin.getId()));
+
         while (!queue.isEmpty()) {
-            Node u = queue.poll();
+            Node u = queue.remove();
             if (!u.getVisited()) {
                 u.setVisited(true);
                 for (HashMap.Entry<Node, Double> entry : u.getNeighbors().entrySet()) {
-                    queue.add(entry.getKey());
-                    paths.put(entry.getKey(), new PathData(0, u));
+                    Node w = entry.getKey();
+                    w.setHop(u.getHop() + 1);
+                    w.setBpE(u);
+                    queue.add(w);
+                    if (!updateHop.containsKey(w.getId())) {
+                        updateHop.put(w.getId(), new Node(w.getId()));
+                        updateHop.get(w.getId()).setBpE(u);
+                        updateHop.get(w.getId()).setHop(w.getHop());
+                    } else {
+                        Node tmp = updateHop.get(w.getId());
+                        if (tmp.getHop() > w.getHop()) {
+                            tmp.setHop(w.getHop());
+                            tmp.setBpE(w.getBpE());
+                        }
+                    }
                 }
             }
         }
@@ -132,6 +207,7 @@ public class ShortestPaths {
     class PathData {
         double distance; // distance of the shortest path from source
         Node previous; // previous node in the path from the source
+
 
         /**
          * constructor: initialize distance and previous node
@@ -178,7 +254,7 @@ public class ShortestPaths {
         Scanner input = new Scanner(System.in);
         //prompt the user to enter a selection
         //1: find shortest path
-        //2: find shortest airport stops (hops)
+        //2: find fewest hops
         System.out.print("Plese select a number: (1) find shortest path, " +
                 "(2) find fewest hops: ");
         int i = input.nextInt();
@@ -250,13 +326,14 @@ public class ShortestPaths {
         } else if (i == 2) {
             //display enhancements
             Node dest = graph.getNode(destCode);
-            if (sh.shortestPath(dest) == null) {
+            if (sh.shortestHop(dest) == null) {
                 System.out.println("no path exists");
             } else {
-                LinkedList<Node> lst = sh.shortestPath(dest);
+                LinkedList<Node> lst = sh.shortestHop(dest);
                 for (Node entry : lst) {
                     System.out.print(entry + " ");
                 }
+                System.out.println();
                 System.out.println("Total edges: " + (lst.size() - 1));
             }
         }

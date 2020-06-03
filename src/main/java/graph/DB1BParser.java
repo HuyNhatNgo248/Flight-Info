@@ -1,10 +1,14 @@
+/*
+ * Author: Huy Nhat Ngo
+ * Date: 6/3/2020
+ * Purpose: supporting class for ShortestPaths
+ */
 package graph;
 
-import java.util.Scanner;
-import java.util.HashMap;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ListIterator;
+import java.util.HashMap;
+import java.util.Scanner;
 
 public class DB1BParser extends GraphParser {
 
