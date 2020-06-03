@@ -1,8 +1,14 @@
+/*
+ * Author: Huy Nhat Ngo
+ * Date: 6/3/2020
+ * Purpose: this class implements Dijkstra’s Single-Source Shortest Paths algorithm
+ * and modified Breath-First Search to find the smallest hop from origin to destination
+ */
+
+
 package graph;
 
-
 import heap.Heap;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;

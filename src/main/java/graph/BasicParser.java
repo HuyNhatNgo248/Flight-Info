@@ -1,9 +1,15 @@
+/*
+ * Author: Huy Nhat Ngo
+ * Date: 6/3/2020
+ * Purpose: supporting class for ShortestPaths
+ */
+
+
 package graph;
 
-import java.util.HashMap;
-import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 /** Basic parser for flight information. Parses a text file with flight
  * information; each line must contain:

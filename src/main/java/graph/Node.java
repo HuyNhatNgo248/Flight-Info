@@ -1,3 +1,10 @@
+/*
+ * Author: Huy Nhat Ngo
+ * Date: 6/3/2020
+ * Purpose: supporting class for ShortestPaths
+ */
+
+
 package graph;
 
 import java.util.HashMap;
