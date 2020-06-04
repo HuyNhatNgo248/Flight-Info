@@ -281,6 +281,7 @@ public class ShortestPaths {
 
         // parse a graph with the given type and filename
         Graph graph;
+        System.out.println(fileName);
         try {
             graph = parseGraph(fileType, fileName);
         } catch (FileNotFoundException e) {
@@ -339,5 +340,6 @@ public class ShortestPaths {
         }
     }
 }
+
 
 
